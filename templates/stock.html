@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Stock</title>
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap"
+rel="stylesheet">
+
+<link rel="stylesheet"
+href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<div id="notify-container"></div>
+
+<!-- NAVBAR -->
+<div class="navbar">
+<a href="/dashboard"><i class="fa fa-home"></i> Home</a>
+<a href="/addpage"><i class="fa fa-plus"></i> Add</a>
+<a href="/stock"><i class="fa fa-box"></i> Stock</a>
+<a href="/"><i class="fa fa-sign-out"></i> Logout</a>
+</div>
+
+
+<!-- MAIN -->
+<div class="main">
+
+<h2>Medicine Stock</h2>
+
+<!-- SEARCH -->
+<div style="text-align:center; margin-bottom:15px;">
+<form method="get" action="/stock">
+<input name="q" placeholder="Search medicine" style="padding:8px; width:200px;">
+<button type="submit" class="btn">
+<i class="fa fa-search"></i> Search
+</button>
+</form>
+</div>
+
+
+<!-- TABLE -->
+<table>
+
+<tr>
+<th>ID</th>
+<th>Name</th>
+<th>Qty</th>
+<th>Expiry</th>
+<th>Price</th>
+<th>Edit</th>
+<th>Delete</th>
+</tr>
+
+{% for m in medicines %}
+
+{% set row_color = "" %}
+{% if m[2]|int < 5 %}
+{% set row_color = "background-color:#fff3cd" %}
+{% endif %}
+
+<td>{{m[0]}}</td>
+<td>{{m[1]}}</td>
+<td>{{m[2]}}</td>
+<td>{{m[3]}}</td>
+<td>{{m[4]}}</td>
+
+<td>
+<a class="btn" href="/edit/{{m[0]}}">
+<i class="fa fa-edit">Edit</i>
+</a>
+</td>
+
+<td>
+<a class="btn" href="/delete/{{m[0]}}">
+<i class="fa fa-trash">Delete</i>
+</a>
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+
+<!-- ALERT SECTION -->
+<div style="margin-top:20px; text-align:center;">
+
+<h3 style="color:red">
+Expired: {{expired}}
+</h3>
+
+<h3 style="color:orange">
+Expiry in 7 days: {{exp7}}
+</h3>
+
+<h3 style="color:#b59f00">
+Expiry in 30 days: {{exp30}}
+</h3>
+
+<h3>
+Low stock: {{low}}
+</h3>
+
+</div>
+
+<br>
+
+<a href="/dashboard" class="back-btn">
+<i class="fa fa-arrow-left"></i> Back
+</a>
+
+</div>
+
+<div id="toast-container"></div>
+
+</body>
+</html>

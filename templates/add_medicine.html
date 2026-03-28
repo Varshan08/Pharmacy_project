@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Add Medicine</title>
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap"
+rel="stylesheet">
+
+<link rel="stylesheet"
+href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+    
+<a href="/dashboard"><i class="fa fa-home"></i> Home</a>
+<a href="/stock"><i class="fa fa-box"></i> Stock</a>
+<a href="/addpage"><i class="fa fa-plus"></i> Add</a>
+<a href="/billing"><i class="fa fa-receipt"></i> Billing</a>
+<a href="/"><i class="fa fa-sign-out"></i> Logout</a>
+</div>
+<div id="notify-container"></div>
+<!-- MAIN -->
+<div class="main">
+
+<h2><i class="fa fa-capsules"></i> Add Medicine</h2>
+
+<div class="form-box">
+
+    <form action="/add" method="post" onsubmit="return validateForm()">
+
+<label for="barcode"><i class="fa fa-barcode"></i> Barcode</label>
+<input id="barcode" name="barcode" placeholder="Scan or enter barcode">
+
+<label for="name"><i class="fa fa-pills"></i> Name</label>
+<input id="name" name="name" placeholder="Enter medicine name" required>
+
+<label for="quantity"><i class="fa fa-box"></i> Quantity</label>
+<input id="quantity" name="quantity" type="number" placeholder="Enter quantity" required>
+
+<label for="expiry"><i class="fa fa-calendar"></i> Expiry</label>
+<input id="expiry" name="expiry" type="date" required>
+
+<label for="price"><i class="fa fa-indian-rupee-sign"></i> Price</label>
+<input id="price" name="price" placeholder="Enter price" required>
+
+<button type="submit">
+<i class="fa fa-plus"></i> Add Medicine
+</button>
+
+</form>
+
+</div>
+
+<!-- SCANNER -->
+<div style="margin-top:20px; text-align:center;">
+<h3><i class="fa fa-camera"></i> Scan Barcode</h3>
+<div id="reader" style="width:300px; margin:auto;"></div>
+</div>
+
+<br>
+
+<a href="/dashboard" class="back-btn">
+<i class="fa fa-arrow-left"></i> Back
+</a>
+
+</div>
+
+<!-- TOAST -->
+<div id="toast-container"></div>
+
+<!-- JS -->
+
+<script>
+function showToast(msg, type="success"){
+
+    let container = document.getElementById("toast-container");
+
+    let toast = document.createElement("div");
+    toast.className = "toast " + type;
+    toast.innerText = msg;
+
+    container.appendChild(toast);
+
+    setTimeout(() => toast.remove(), 3000);
+}
+</script>
+
+<!-- BARCODE AUTO FILL -->
+<script>
+document.getElementById("barcode").addEventListener("input", function(){
+
+    let code = this.value;
+
+    if(!code) return;
+
+    fetch("/get_medicine/" + code)
+    .then(res => res.json())
+    .then(data => {
+
+        if(data.found){
+
+            document.getElementById("name").value = data.name;
+            document.getElementById("price").value = data.price;
+
+            showToast("Existing medicine → Quantity will update", "warning");
+
+        } else {
+
+            document.getElementById("name").value = "";
+            document.getElementById("price").value = "";
+
+            showToast("New medicine → Enter details", "success");
+
+        }
+
+    });
+
+});
+</script>
+
+<!-- SCANNER -->
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+<script>
+function onScanSuccess(decodedText) {
+
+    let barcodeInput = document.getElementById("barcode");
+
+    barcodeInput.value = decodedText;
+
+    // trigger input event
+    barcodeInput.dispatchEvent(new Event("input"));
+}
+
+new Html5QrcodeScanner("reader", { fps: 10 }).render(onScanSuccess);
+</script>
+
+<script>
+function validateForm(){
+
+    let name = document.getElementById("name").value;
+    let qty = document.getElementById("quantity").value;
+
+    if(!name || !qty){
+        alert("Fill all fields");
+        return false;
+    }
+
+    return true;
+}
+</script>
+
+</body>
+</html>

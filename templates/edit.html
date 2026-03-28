@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Edit Medicine</title>
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap"
+rel="stylesheet">
+
+<link rel="stylesheet"
+href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<div id="notify-container"></div>
+
+<!-- NAVBAR -->
+<div class="navbar">
+<a href="/dashboard"><i class="fa fa-home"></i> Home</a>
+<a href="/stock"><i class="fa fa-box"></i> Stock</a>
+<a href="/addpage"><i class="fa fa-plus"></i> Add</a>
+<a href="/billing"><i class="fa fa-receipt"></i> Billing</a>
+<a href="/"><i class="fa fa-sign-out"></i> Logout</a>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+<h2><i class="fa fa-pen"></i> Edit Medicine</h2>
+
+<div class="form-box">
+
+<form action="/update" method="post">
+
+<input type="hidden" name="id" value="{{m[0]}}">
+
+<label><i class="fa fa-pills"></i> Name</label>
+<input name="name"
+value="{{m[1]}}"
+placeholder="Medicine name"
+title="Name"
+required>
+
+<label><i class="fa fa-box"></i> Quantity</label>
+<input name="quantity"
+type="number"
+value="{{m[2]}}"
+placeholder="Quantity"
+title="Quantity"
+required>
+
+<label><i class="fa fa-calendar"></i> Expiry</label>
+<input name="expiry"
+type="date"
+value="{{m[3]}}"
+title="Expiry"
+required>
+
+<label><i class="fa fa-indian-rupee-sign"></i> Price</label>
+<input name="price"
+value="{{m[4]}}"
+placeholder="Price"
+title="Price"
+required>
+
+<button type="submit" class="btn-primary">
+<i class="fa fa-save"></i> Update Medicine
+</button>
+
+</form>
+
+</div>
+
+<br>
+
+<a href="/stock" class="back-btn">
+<i class="fa fa-arrow-left"></i> Back to Stock
+</a>
+
+</div>
+
+<!-- TOAST -->
+<div id="toast-container"></div>
+
+<!-- OPTIONAL TOAST SCRIPT -->
+<script>
+function showToast(msg, type="success"){
+
+    let container = document.getElementById("toast-container");
+
+    let toast = document.createElement("div");
+    toast.className = "toast " + type;
+    toast.innerText = msg;
+
+    container.appendChild(toast);
+
+    setTimeout(() => toast.remove(), 3000);
+}
+</script>
+
+</body>
+</html>

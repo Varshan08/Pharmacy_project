@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expired Medicines</title>
+
+    <link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap"
+rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+<body>
+    
+</body>
+</html>
+
+<body>
+
+<div id="notify-container"></div>
+
+<div class="navbar">
+
+<a href="/dashboard">Home</a>
+<a href="/stock">Stock</a>
+
+</div>
+
+<div class="main">
+
+<h2>Expired Medicines</h2>
+
+<table>
+
+<tr>
+<th>Name</th>
+<th>Qty</th>
+<th>Expiry</th>
+</tr>
+
+{% for m in data %}
+
+<tr>
+<td>{{m[1]}}</td>
+<td>{{m[2]}}</td>
+<td>{{m[3]}}</td>
+</tr>
+
+{% endfor %}
+
+</table>
+
+<a href="/dashboard" class="back-btn">Back</a>
+
+</div>
+
+<div id="toast-container"></div>
+
+</body>

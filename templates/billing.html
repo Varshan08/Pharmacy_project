@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billing</title>
+
+    <link rel="stylesheet"
+</html>
+<html>
+<head>
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap"
+rel="stylesheet">
+
+<link rel="stylesheet"
+href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<div class="navbar">
+<a href="/dashboard">Home</a>
+<a href="/stock">Stock</a>
+<a href="/billing">Billing</a>
+</div>
+
+<div class="main">
+
+<h2><i class="fa fa-cash-register"></i> Billing</h2>
+
+<!-- SCAN -->
+<label>Scan Barcode</label>
+<input id="barcode" placeholder="Scan barcode">
+
+<br><br>
+
+<!-- BILL TABLE -->
+<table id="billTable">
+
+<tr>
+<th>Name</th>
+<th>Qty</th>
+<th>Price</th>
+<th>Total</th>
+<th>Action</th>
+</tr>
+
+</table>
+
+<h3>Total Amount: ₹ <span id="grandTotal">0</span></h3>
+
+<button onclick="checkout()" class="btn">
+Checkout
+</button>
+
+</div>
+
+<script>
+
+let cart = {};
+
+// scan input
+document.getElementById("barcode").addEventListener("change", function(){
+
+    let code = this.value;
+
+    fetch("/get_medicine/" + code)
+    .then(res => res.json())
+    .then(data => {
+
+        if(data.found){
+
+            if(cart[code]){
+                cart[code].qty += 1;
+            } else {
+                cart[code] = {
+                    name: data.name,
+                    price: parseInt(data.price),
+                    qty: 1
+                };
+            }
+
+            renderTable();
+
+        } else {
+            alert("Item not found");
+        }
+
+        this.value = "";
+
+    });
+
+});
+
+
+function renderTable(){
+
+    let table = document.getElementById("billTable");
+
+    table.innerHTML = `
+    <tr>
+    <th>Name</th>
+    <th>Qty</th>
+    <th>Price</th>
+    <th>Total</th>
+    <th>Action</th>
+    </tr>
+    `;
+
+    let grand = 0;
+
+    for(let code in cart){
+
+        let item = cart[code];
+        let total = item.qty * item.price;
+        grand += total;
+
+        table.innerHTML += `
+        <tr>
+        <td>${item.name}</td>
+        <td>${item.qty}</td>
+        <td>${item.price}</td>
+        <td>${total}</td>
+        <td><button onclick="removeItem('${code}')">X</button></td>
+        </tr>
+        `;
+    }
+
+    document.getElementById("grandTotal").innerText = grand;
+}
+
+
+function removeItem(code){
+    delete cart[code];
+    renderTable();
+}
+
+
+function checkout(){
+    alert("Bill Generated!");
+    cart = {};
+    renderTable();
+}
+
+</script>
+
+<div id="toast-container"></div>
+
+</body>
+</html>
