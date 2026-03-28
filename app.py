@@ -20,9 +20,9 @@ last_email_sent = []
 
 def send_email(low_items):
     try:
-        sender = "your_email@gmail.com"
-        password = "your_app_password"
-        receiver = "supplier@gmail.com"
+        sender = "varshanyuvaraj08@gmail.com"
+        password = "qealpqovlwcrrzyf"
+        receiver = "karthikashanmuga11@gmail.com"
 
         server = smtplib.SMTP("smtp.gmail.com", 587)
         server.starttls()
