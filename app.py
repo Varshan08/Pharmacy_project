@@ -2,11 +2,15 @@ from flask import Flask, render_template, request, redirect
 import sqlite3
 from datetime import datetime
 import smtplib
+import os
+
+IS_RENDER = os.environ.get("RENDER") is not None
 
 # 🔥 ADDED IMPORTS
 import threading
 import time
-import tkinter as tk
+if not IS_RENDER:
+    import tkinter as tk
 
 app = Flask(__name__)
 
@@ -56,6 +60,9 @@ def send_email(low_items):
 # 🔥 ---------------- CUSTOM NOTIFICATION ----------------
 
 def show_custom_notification(message, alert_type="normal"):
+
+    if not IS_RENDER:
+        show_custom_notification(...)
 
     root = tk.Tk()
     root.overrideredirect(True)
