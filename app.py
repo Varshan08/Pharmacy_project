@@ -177,24 +177,27 @@ def home():
 def login():
 
     if request.method == "POST":
-        username = request.form["username"]
-    password = request.form["password"]
+        username = request.form.get("username")
+        password = request.form.get("password")
 
-    conn = sqlite3.connect("database.db")
-    cursor = conn.cursor()
+        conn = sqlite3.connect("database.db")
+        cursor = conn.cursor()
 
-    cursor.execute(
-        "SELECT * FROM users WHERE username=? AND password=?",
-        (username, password)
-    )
+        cursor.execute(
+            "SELECT * FROM users WHERE username=? AND password=?",
+            (username, password)
+        )
 
-    user = cursor.fetchone()
-    conn.close()
+        user = cursor.fetchone()
+        conn.close()
 
-    if user:
-        return redirect("/dashboard")
-    else:
-        return render_template("login.html", error="Invalid Login")
+        if user:
+            return redirect("/dashboard")
+        else:
+            return render_template("login.html", error="Invalid Login")
+
+    # 👇 THIS LINE FIXES YOUR ERROR
+    return render_template("login.html")
 
 
 # ---------------- DASHBOARD ----------------
