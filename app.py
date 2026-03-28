@@ -163,7 +163,7 @@ def background_alert_checker():
 
 @app.route("/")
 def home():
-    return render_template("login.html")
+    return redirect("/loginpage")
 
 
 @app.route("/login", methods=["POST"])
