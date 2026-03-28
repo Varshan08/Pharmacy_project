@@ -541,5 +541,3 @@ def billing():
 if __name__ == "__main__":
 
     threading.Thread(target=background_alert_checker, daemon=True).start()
-
-    app.run(debug=True)
