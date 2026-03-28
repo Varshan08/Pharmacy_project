@@ -170,13 +170,14 @@ def background_alert_checker():
 
 @app.route("/")
 def home():
-    return redirect("/index")
+    return redirect("/login")
 
 
-@app.route("/login", methods=["POST"])
+@app.route("/login", methods=["GET", "POST"])
 def login():
 
-    username = request.form["username"]
+    if request.method == "POST":
+        username = request.form["username"]
     password = request.form["password"]
 
     conn = sqlite3.connect("database.db")
@@ -193,7 +194,7 @@ def login():
     if user:
         return redirect("/dashboard")
     else:
-        return "Invalid Login"
+        return render_template("login.html", error="Invalid Login")
 
 
 # ---------------- DASHBOARD ----------------
