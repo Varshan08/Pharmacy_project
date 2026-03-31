@@ -1,77 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"> <!-- Character encoding -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Mobile responsiveness -->
-    <title>Login</title>
-
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap"
-rel="stylesheet">
-
-<link rel="stylesheet"
-href="{{ url_for('static', filename='style.css') }}">
-
-<title>Login</title>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pharmacy Login</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
 <body>
+<div class="login-wrap">
+    <div class="login-box">
+        <div class="login-logo">
+            <i class="fa fa-capsules"></i>
+            <h2>PharmaCare</h2>
+            <p>Pharmacy Management System</p>
+        </div>
 
-<div id="notify-container"></div>
+        {% if error %}
+        <div class="error-msg">
+            <i class="fa fa-exclamation-circle"></i>
+            {{ error }}
+        </div>
+        {% endif %}
 
-<div class="main">
-
-<h2>
-<i class="fa fa-user"></i>
-Pharmacy Login
-</h2>
-
-<div class="form-box">
-
-<form action="/login" method="post">
-
-<label for="username">
-<i class="fa fa-user"></i>
-Username
-</label>
-
-<input
-id="username"
-name="username"
-placeholder="Enter username"
-title="Username"
-required>
-
-
-<label for="password">
-<i class="fa fa-lock"></i>
-Password
-</label>
-
-<input
-id="password"
-name="password"
-type="password"
-placeholder="Enter password"
-title="Password"
-required>
-
-
-<button type="submit">
-<i class="fa fa-sign-in"></i>
-Login
-</button>
-
-</form>
-
+        <form action="/login" method="post">
+            <div class="form-group" style="margin-bottom:16px;">
+                <label><i class="fa fa-user"></i> Username</label>
+                <input name="username" placeholder="Enter username" required autofocus>
+            </div>
+            <div class="form-group" style="margin-bottom:20px;">
+                <label><i class="fa fa-lock"></i> Password</label>
+                <input name="password" type="password" placeholder="Enter password" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full">
+                <i class="fa fa-sign-in-alt"></i> Login
+            </button>
+        </form>
+    </div>
 </div>
-
-</div>
-
-<div id="toast-container"></div>
-
 </body>
 </html>

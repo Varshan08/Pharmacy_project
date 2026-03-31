@@ -1,65 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Expired Medicines</title>
-
-    <link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap"
-rel="stylesheet">
-
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Expired Medicines</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    
-</body>
-</html>
-
-<body>
-
-<div id="notify-container"></div>
 
 <div class="navbar">
-
-<a href="/dashboard">Home</a>
-<a href="/stock">Stock</a>
-
+    <span class="brand">💊 PHARMACARE</span>
+    <a href="/dashboard"><i class="fa fa-home"></i> Dashboard</a>
+    <a href="/addpage"><i class="fa fa-plus"></i> Add</a>
+    <a href="/stock"><i class="fa fa-box"></i> Stock</a>
+    <a href="/billing"><i class="fa fa-receipt"></i> Billing</a>
+    <a href="/logout" class="logout"><i class="fa fa-sign-out-alt"></i> Logout</a>
 </div>
 
 <div class="main">
+    <div class="page-title">
+        <i class="fa fa-ban" style="color:var(--danger);"></i> Expired Medicines
+    </div>
 
-<h2>Expired Medicines</h2>
-
-<table>
-
-<tr>
-<th>Name</th>
-<th>Qty</th>
-<th>Expiry</th>
-</tr>
-
-{% for m in data %}
-
-<tr>
-<td>{{m[1]}}</td>
-<td>{{m[2]}}</td>
-<td>{{m[3]}}</td>
-</tr>
-
-{% endfor %}
-
-</table>
-
-<a href="/dashboard" class="back-btn">Back</a>
-
+    <div class="box">
+        {% if data %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th><th>Name</th><th>Qty</th><th>Expired On</th><th>Price</th><th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in data %}
+                    <tr>
+                        <td style="color:var(--text2); font-size:12px;">{{ m[0] }}</td>
+                        <td><strong>{{ m[1] }}</strong></td>
+                        <td>{{ m[2] }}</td>
+                        <td><span class="badge badge-red">{{ m[3] }}</span></td>
+                        <td>₹{{ m[4] }}</td>
+                        <td>
+                            <a href="/delete/{{ m[0] }}" class="btn btn-danger" style="font-size:12px; padding:6px 10px;"
+                               onclick="return confirm('Remove expired medicine?')">
+                                <i class="fa fa-trash"></i> Remove
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p style="text-align:center; color:var(--text2); padding:30px;">
+            <i class="fa fa-check-circle" style="font-size:32px; color:var(--success); display:block; margin-bottom:10px;"></i>
+            No expired medicines found!
+        </p>
+        {% endif %}
+    </div>
 </div>
-
-<div id="toast-container"></div>
-
 </body>
+</html>

@@ -1,179 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-
-   <link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap"
-rel="stylesheet">
-
-<link rel="stylesheet"
-href="{{ url_for('static', filename='style.css') }}">
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
 <body>
 
 <div id="notify-container"></div>
 
 <div class="navbar">
-
-<a href="/dashboard">
-<i class="fa fa-home"></i> Home
-</a>
-
-<a href="/addpage">
-<i class="fa fa-plus"></i> Add
-</a>
-
-<a href="/stock">
-<i class="fa fa-box"></i> Stock
-</a>
-
-<a href="/">
-<i class="fa fa-sign-out"></i> Logout
-</a>
-
+    <span class="brand">💊 PHARMACARE</span>
+    <a href="/dashboard" class="active"><i class="fa fa-home"></i> Dashboard</a>
+    <a href="/addpage"><i class="fa fa-plus"></i> Add</a>
+    <a href="/stock"><i class="fa fa-box"></i> Stock</a>
+    <a href="/billing"><i class="fa fa-receipt"></i> Billing</a>
+    <a href="/logout" class="logout"><i class="fa fa-sign-out-alt"></i> Logout</a>
 </div>
-
 
 <div class="main">
+    <div class="page-title">
+        <i class="fa fa-chart-line"></i> Dashboard
+    </div>
 
-<h2>Dashboard</h2>
+    <div class="card-grid">
+        <a href="/stock" class="stat-card green">
+            <div class="stat-icon"><i class="fa fa-pills"></i></div>
+            <div class="stat-num">{{ total }}</div>
+            <div class="stat-label">Total Medicines</div>
+        </a>
 
-<div class="card-box">
+        <a href="/lowstock" class="stat-card yellow">
+            <div class="stat-icon"><i class="fa fa-exclamation-triangle"></i></div>
+            <div class="stat-num">{{ low }}</div>
+            <div class="stat-label">Low Stock</div>
+        </a>
 
-<a href="/lowstock" class="card low">
-Low {{low}}
-</a>
+        <a href="/stock" class="stat-card blue">
+            <div class="stat-icon"><i class="fa fa-clock"></i></div>
+            <div class="stat-num">{{ exp }}</div>
+            <div class="stat-label">Expiring Soon</div>
+        </a>
 
-<a href="/stock" class="card exp">
-Expiry {{exp}}
-</a>
+        <a href="/expired" class="stat-card red">
+            <div class="stat-icon"><i class="fa fa-ban"></i></div>
+            <div class="stat-num">{{ expired }}</div>
+            <div class="stat-label">Expired</div>
+        </a>
+    </div>
 
-<a href="/expired" class="card danger">
-Expired {{expired}}
-</a>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+        <div class="box">
+            <h3 style="margin-bottom:14px; font-size:14px; color:var(--text2);">
+                <i class="fa fa-exclamation-triangle" style="color:var(--warning);"></i> Low Stock Items
+            </h3>
+            {% if low_list %}
+                {% for item in low_list %}
+                <div style="padding:8px 0; border-bottom:1px solid var(--border); font-size:14px;">
+                    <i class="fa fa-pills" style="color:var(--warning); margin-right:8px;"></i>{{ item }}
+                </div>
+                {% endfor %}
+            {% else %}
+                <p style="color:var(--text2); font-size:13px;">All items have sufficient stock ✅</p>
+            {% endif %}
+        </div>
 
+        <div class="box">
+            <h3 style="margin-bottom:14px; font-size:14px; color:var(--text2);">
+                <i class="fa fa-clock" style="color:var(--danger);"></i> Expiring Soon
+            </h3>
+            {% if exp_list %}
+                {% for item in exp_list %}
+                <div style="padding:8px 0; border-bottom:1px solid var(--border); font-size:14px;">
+                    <i class="fa fa-calendar-times" style="color:var(--danger); margin-right:8px;"></i>{{ item }}
+                </div>
+                {% endfor %}
+            {% else %}
+                <p style="color:var(--text2); font-size:13px;">No medicines expiring soon ✅</p>
+            {% endif %}
+        </div>
+    </div>
 </div>
 
+<button class="wa-float" onclick="sendWhatsApp()" title="Alert Supplier">
+    <i class="fab fa-whatsapp"></i>
+    <span class="wa-badge" id="wa-badge">0</span>
+</button>
 
-</div>
-
+<script src="{{ url_for('static', filename='script.js') }}"></script>
 <script>
+let lowItems = {{ low_list | tojson | safe }};
+let expItems = {{ exp_list | tojson | safe }};
 
-let lowItems = JSON.parse('{{ low_list | tojson | safe }}');
-let expItems = JSON.parse('{{ exp_list | tojson | safe }}');
+if (lowItems.length > 0) showNotify("⚠️ Low Stock", lowItems.join(", "), "warning");
+if (expItems.length > 0) showNotify("🕐 Expiring Soon", expItems.join(", "), "error");
 
-if(lowItems.length > 0){
-    showNotify("Low Stock", lowItems.join(", "), "warning");
-}
-
-if(expItems.length > 0){
-    showNotify("Expiry Alert", expItems.join(", "), "error");
-}
-
-</script>
-
-<script>
-
-function sendWhatsApp(){
-
-    fetch("/whatsapp_alert")
-    .then(res => res.json())
-    .then(data => {
-
-        if(!data.msg){
-            showNotify("No Low Stock", "All items are sufficient", "success");
-            return;
-        }
-
-        let phone = "91XXXXXXXXXX";   // 🔥 supplier number
-
-        let url = `https://wa.me/${phone}?text=${encodeURIComponent(data.msg)}`;
-
-        window.open(url, "_blank");
-
-        showNotify("WhatsApp Ready", "Message opened", "success");
-
-    });
-
-}
-
-</script>
-
-<script>
-
-function checkAlerts(){
-
-    fetch("/check_alerts")
-    .then(res => res.json())
-    .then(data => {
-
-        if(data.low.length > 0){
-            showNotify(
-                "Low Stock",
-                data.low.join(", "),
-                "warning"
-            );
-        }
-
-        if(data.exp.length > 0){
-            showNotify(
-                "Expiry Alert",
-                data.exp.join(", "),
-                "error"
-            );
-        }
-
-        // 🔥 EMAIL STATUS UI
-        if(data.email_status === "success"){
-            showNotify(
-                "Email Sent",
-                "Supplier notified successfully",
-                "success"
-            );
-        }
-
-        if(data.email_status === "error"){
-            showNotify(
-                "Email Failed",
-                "Check email configuration",
-                "error"
-            );
-        }
-
-    });
-
-}
-
-// run every 5 mins
 setInterval(checkAlerts, 300000);
-
-// run once
-checkAlerts();
-
 </script>
-
-</div>
-<a href="/dashboard" class="back-btn">Back</a>
-
-<div id="toast-container"></div>
-
-<div class="wa-float" onclick="sendWhatsApp()">
-
-    <i class="fa fa-whatsapp"></i>
-
-    <!-- 🔴 BADGE -->
-    <span id="wa-badge" class="wa-badge">0</span>
-
-    <span class="wa-tooltip">Order Stock</span>
-
-</div>
-
 </body>
 </html>

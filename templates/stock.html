@@ -3,124 +3,95 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Stock</title>
-
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap"
-rel="stylesheet">
-
-<link rel="stylesheet"
-href="{{ url_for('static', filename='style.css') }}">
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
 <body>
 
 <div id="notify-container"></div>
 
-<!-- NAVBAR -->
 <div class="navbar">
-<a href="/dashboard"><i class="fa fa-home"></i> Home</a>
-<a href="/addpage"><i class="fa fa-plus"></i> Add</a>
-<a href="/stock"><i class="fa fa-box"></i> Stock</a>
-<a href="/"><i class="fa fa-sign-out"></i> Logout</a>
+    <span class="brand">💊 PHARMACARE</span>
+    <a href="/dashboard"><i class="fa fa-home"></i> Dashboard</a>
+    <a href="/addpage"><i class="fa fa-plus"></i> Add</a>
+    <a href="/stock" class="active"><i class="fa fa-box"></i> Stock</a>
+    <a href="/billing"><i class="fa fa-receipt"></i> Billing</a>
+    <a href="/logout" class="logout"><i class="fa fa-sign-out-alt"></i> Logout</a>
 </div>
 
-
-<!-- MAIN -->
 <div class="main">
+    <div class="page-title">
+        <i class="fa fa-box"></i> Medicine Stock
+    </div>
 
-<h2>Medicine Stock</h2>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+        <form method="get" action="/stock" class="search-bar">
+            <input name="q" placeholder="Search medicine..." value="{{ request.args.get('q', '') }}">
+            <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i></button>
+        </form>
+        <div style="display:flex; gap:16px; font-size:13px;">
+            <span style="color:var(--danger);"><i class="fa fa-ban"></i> Expired: {{ expired }}</span>
+            <span style="color:var(--warning);"><i class="fa fa-clock"></i> Expiring 7d: {{ exp7 }}</span>
+            <span style="color:var(--accent);"><i class="fa fa-calendar"></i> Expiring 30d: {{ exp30 }}</span>
+            <span style="color:var(--text2);"><i class="fa fa-exclamation-triangle"></i> Low: {{ low }}</span>
+        </div>
+    </div>
 
-<!-- SEARCH -->
-<div style="text-align:center; margin-bottom:15px;">
-<form method="get" action="/stock">
-<input name="q" placeholder="Search medicine" style="padding:8px; width:200px;">
-<button type="submit" class="btn">
-<i class="fa fa-search"></i> Search
-</button>
-</form>
+    <div class="box">
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Qty</th>
+                        <th>Expiry</th>
+                        <th>Price</th>
+                        <th>Barcode</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for m in medicines %}
+                <tr>
+                    <td style="color:var(--text2); font-family:var(--mono); font-size:12px;">{{ m[0] }}</td>
+                    <td><strong>{{ m[1] }}</strong></td>
+                    <td>
+                        {% if m[2]|int < 5 %}
+                            <span class="badge badge-red">{{ m[2] }}</span>
+                        {% else %}
+                            {{ m[2] }}
+                        {% endif %}
+                    </td>
+                    <td style="font-size:13px;">{{ m[3] }}</td>
+                    <td>₹{{ m[4] }}</td>
+                    <td style="font-family:var(--mono); font-size:12px; color:var(--text2);">{{ m[5] if m[5] else '—' }}</td>
+                    <td>
+                        {% if m[3] %}
+                            <span class="badge badge-green">OK</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="display:flex; gap:8px;">
+                            <a href="/edit/{{ m[0] }}" class="btn btn-secondary" style="padding:6px 10px; font-size:12px;">
+                                <i class="fa fa-edit"></i> Edit
+                            </a>
+                            <a href="/delete/{{ m[0] }}" class="btn btn-danger" style="padding:6px 10px; font-size:12px;"
+                               onclick="return confirm('Delete this medicine?')">
+                                <i class="fa fa-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
-
-<!-- TABLE -->
-<table>
-
-<tr>
-<th>ID</th>
-<th>Name</th>
-<th>Qty</th>
-<th>Expiry</th>
-<th>Price</th>
-<th>Edit</th>
-<th>Delete</th>
-</tr>
-
-{% for m in medicines %}
-
-{% set row_color = "" %}
-{% if m[2]|int < 5 %}
-{% set row_color = "background-color:#fff3cd" %}
-{% endif %}
-
-<td>{{m[0]}}</td>
-<td>{{m[1]}}</td>
-<td>{{m[2]}}</td>
-<td>{{m[3]}}</td>
-<td>{{m[4]}}</td>
-
-<td>
-<a class="btn" href="/edit/{{m[0]}}">
-<i class="fa fa-edit">Edit</i>
-</a>
-</td>
-
-<td>
-<a class="btn" href="/delete/{{m[0]}}">
-<i class="fa fa-trash">Delete</i>
-</a>
-</td>
-
-</tr>
-
-{% endfor %}
-
-</table>
-
-
-<!-- ALERT SECTION -->
-<div style="margin-top:20px; text-align:center;">
-
-<h3 style="color:red">
-Expired: {{expired}}
-</h3>
-
-<h3 style="color:orange">
-Expiry in 7 days: {{exp7}}
-</h3>
-
-<h3 style="color:#b59f00">
-Expiry in 30 days: {{exp30}}
-</h3>
-
-<h3>
-Low stock: {{low}}
-</h3>
-
-</div>
-
-<br>
-
-<a href="/dashboard" class="back-btn">
-<i class="fa fa-arrow-left"></i> Back
-</a>
-
-</div>
-
-<div id="toast-container"></div>
-
+<script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

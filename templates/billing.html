@@ -1,155 +1,311 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Billing</title>
-
-    <link rel="stylesheet"
-</html>
-<html>
-<head>
-
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap"
-rel="stylesheet">
-
-<link rel="stylesheet"
-href="{{ url_for('static', filename='style.css') }}">
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Billing</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
 <body>
 
+<div id="notify-container"></div>
+
 <div class="navbar">
-<a href="/dashboard">Home</a>
-<a href="/stock">Stock</a>
-<a href="/billing">Billing</a>
+    <span class="brand">💊 PHARMACARE</span>
+    <a href="/dashboard"><i class="fa fa-home"></i> Dashboard</a>
+    <a href="/addpage"><i class="fa fa-plus"></i> Add</a>
+    <a href="/stock"><i class="fa fa-box"></i> Stock</a>
+    <a href="/billing" class="active"><i class="fa fa-receipt"></i> Billing</a>
+    <a href="/logout" class="logout"><i class="fa fa-sign-out-alt"></i> Logout</a>
 </div>
 
 <div class="main">
+    <div class="page-title">
+        <i class="fa fa-cash-register"></i> Billing
+    </div>
 
-<h2><i class="fa fa-cash-register"></i> Billing</h2>
+    <div class="bill-layout">
 
-<!-- SCAN -->
-<label>Scan Barcode</label>
-<input id="barcode" placeholder="Scan barcode">
+        <!-- LEFT: SCANNER + CART -->
+        <div>
+            <!-- SCANNER -->
+            <div class="box" style="margin-bottom:20px;">
+                <h3 style="font-size:14px; margin-bottom:14px;">
+                    <i class="fa fa-barcode" style="color:var(--accent);"></i> Scan Item
+                </h3>
 
-<br><br>
+                <div style="display:flex; gap:10px; margin-bottom:14px;">
+                    <input id="barcode" placeholder="Scan or type barcode..." style="flex:1;">
+                    <button onclick="startCamera()" class="btn btn-primary" id="startBtn">
+                        <i class="fa fa-camera"></i> Camera
+                    </button>
+                    <button onclick="stopCamera()" class="btn btn-secondary" id="stopBtn" style="display:none;">
+                        <i class="fa fa-stop"></i>
+                    </button>
+                </div>
 
-<!-- BILL TABLE -->
-<table id="billTable">
+                <div class="scanner-box" id="scannerBox" style="display:none;">
+                    <div id="reader"></div>
+                </div>
+            </div>
 
-<tr>
-<th>Name</th>
-<th>Qty</th>
-<th>Price</th>
-<th>Total</th>
-<th>Action</th>
-</tr>
+            <!-- CART TABLE -->
+            <div class="box">
+                <h3 style="font-size:14px; margin-bottom:14px;">
+                    <i class="fa fa-shopping-cart" style="color:var(--success);"></i> Cart
+                </h3>
 
-</table>
+                <div class="table-wrap">
+                    <table id="billTable">
+                        <thead>
+                            <tr>
+                                <th>Medicine</th>
+                                <th>Qty</th>
+                                <th>Price</th>
+                                <th>Total</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="cartBody">
+                            <tr id="emptyRow">
+                                <td colspan="5" style="text-align:center; color:var(--text2); padding:30px;">
+                                    <i class="fa fa-shopping-cart" style="font-size:24px; display:block; margin-bottom:8px; opacity:0.3;"></i>
+                                    Scan items to add to cart
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 
-<h3>Total Amount: ₹ <span id="grandTotal">0</span></h3>
+        <!-- RIGHT: SUMMARY -->
+        <div>
+            <div class="box" style="position:sticky; top:80px;">
+                <h3 style="font-size:14px; margin-bottom:20px;">
+                    <i class="fa fa-receipt" style="color:var(--accent);"></i> Bill Summary
+                </h3>
 
-<button onclick="checkout()" class="btn">
-Checkout
-</button>
+                <div style="margin-bottom:20px;">
+                    <div style="font-size:12px; color:var(--text2); margin-bottom:6px;">TOTAL AMOUNT</div>
+                    <div class="bill-total">₹<span id="grandTotal">0</span></div>
+                </div>
 
+                <div style="border-top:1px solid var(--border); padding-top:16px; margin-bottom:16px;">
+                    <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:8px;">
+                        <span style="color:var(--text2);">Items</span>
+                        <span id="itemCount">0</span>
+                    </div>
+                </div>
+
+                <button onclick="checkout()" class="btn btn-success btn-full" style="margin-bottom:10px;">
+                    <i class="fa fa-check"></i> Checkout & Print
+                </button>
+
+                <button onclick="clearCart()" class="btn btn-secondary btn-full">
+                    <i class="fa fa-trash"></i> Clear Cart
+                </button>
+            </div>
+        </div>
+
+    </div>
 </div>
 
+<!-- PRINT AREA -->
+<div id="printArea" style="display:none;">
+    <h2>PharmaCare — Bill Receipt</h2>
+    <p id="printDate"></p>
+    <table id="printTable" border="1" cellpadding="8" style="width:100%; border-collapse:collapse;"></table>
+    <h3 id="printTotal"></h3>
+</div>
+
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+
 <script>
-
 let cart = {};
+let scanner = null;
 
-// scan input
-document.getElementById("barcode").addEventListener("change", function(){
-
-    let code = this.value;
-
-    fetch("/get_medicine/" + code)
-    .then(res => res.json())
-    .then(data => {
-
-        if(data.found){
-
-            if(cart[code]){
-                cart[code].qty += 1;
-            } else {
-                cart[code] = {
-                    name: data.name,
-                    price: parseInt(data.price),
-                    qty: 1
-                };
-            }
-
-            renderTable();
-
-        } else {
-            alert("Item not found");
-        }
-
-        this.value = "";
-
-    });
-
+// BARCODE INPUT
+document.getElementById("barcode").addEventListener("change", function () {
+    let code = this.value.trim();
+    if (!code) return;
+    addToCart(code);
+    this.value = "";
 });
 
+function addToCart(code) {
+    fetch("/get_medicine/" + code)
+        .then(res => res.json())
+        .then(data => {
+            if (data.found) {
+                if (cart[code]) {
+                    cart[code].qty += 1;
+                } else {
+                    cart[code] = {
+                        name: data.name,
+                        price: parseFloat(data.price),
+                        qty: 1,
+                        barcode: code
+                    };
+                }
+                renderCart();
+                showNotify("Added", data.name + " added to cart", "success");
+            } else {
+                showNotify("Not Found", "No medicine with barcode: " + code, "error");
+            }
+        });
+}
 
-function renderTable(){
+function renderCart() {
+    let tbody = document.getElementById("cartBody");
+    let empty = document.getElementById("emptyRow");
 
-    let table = document.getElementById("billTable");
+    if (Object.keys(cart).length === 0) {
+        tbody.innerHTML = `<tr id="emptyRow">
+            <td colspan="5" style="text-align:center; color:var(--text2); padding:30px;">
+                <i class="fa fa-shopping-cart" style="font-size:24px; display:block; margin-bottom:8px; opacity:0.3;"></i>
+                Scan items to add to cart
+            </td>
+        </tr>`;
+        document.getElementById("grandTotal").innerText = "0";
+        document.getElementById("itemCount").innerText = "0";
+        return;
+    }
 
-    table.innerHTML = `
-    <tr>
-    <th>Name</th>
-    <th>Qty</th>
-    <th>Price</th>
-    <th>Total</th>
-    <th>Action</th>
-    </tr>
-    `;
-
+    let rows = "";
     let grand = 0;
+    let count = 0;
 
-    for(let code in cart){
-
+    for (let code in cart) {
         let item = cart[code];
         let total = item.qty * item.price;
         grand += total;
+        count += item.qty;
 
-        table.innerHTML += `
-        <tr>
-        <td>${item.name}</td>
-        <td>${item.qty}</td>
-        <td>${item.price}</td>
-        <td>${total}</td>
-        <td><button onclick="removeItem('${code}')">X</button></td>
-        </tr>
-        `;
+        rows += `<tr>
+            <td><strong>${item.name}</strong></td>
+            <td>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <button onclick="changeQty('${code}',-1)" style="background:var(--surface2); border:1px solid var(--border); color:var(--text); width:24px; height:24px; border-radius:4px; cursor:pointer;">-</button>
+                    ${item.qty}
+                    <button onclick="changeQty('${code}',1)" style="background:var(--surface2); border:1px solid var(--border); color:var(--text); width:24px; height:24px; border-radius:4px; cursor:pointer;">+</button>
+                </div>
+            </td>
+            <td>₹${item.price}</td>
+            <td>₹${total.toFixed(2)}</td>
+            <td><button onclick="removeItem('${code}')" class="btn btn-danger" style="padding:4px 8px; font-size:11px;"><i class="fa fa-times"></i></button></td>
+        </tr>`;
     }
 
-    document.getElementById("grandTotal").innerText = grand;
+    tbody.innerHTML = rows;
+    document.getElementById("grandTotal").innerText = grand.toFixed(2);
+    document.getElementById("itemCount").innerText = count;
 }
 
+function changeQty(code, delta) {
+    cart[code].qty += delta;
+    if (cart[code].qty <= 0) delete cart[code];
+    renderCart();
+}
 
-function removeItem(code){
+function removeItem(code) {
     delete cart[code];
-    renderTable();
+    renderCart();
 }
 
-
-function checkout(){
-    alert("Bill Generated!");
+function clearCart() {
     cart = {};
-    renderTable();
+    renderCart();
 }
 
+function checkout() {
+    if (Object.keys(cart).length === 0) {
+        showNotify("Empty Cart", "Add items before checkout", "error");
+        return;
+    }
+
+    let items = Object.values(cart);
+
+    fetch("/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            printBill();
+            clearCart();
+            showNotify("✅ Checkout Done", "Bill generated successfully", "success");
+        } else {
+            showNotify("Error", data.error, "error");
+        }
+    });
+}
+
+function printBill() {
+    let printArea = document.getElementById("printArea");
+    let printTable = document.getElementById("printTable");
+    document.getElementById("printDate").innerText = new Date().toLocaleString();
+
+    let rows = "<tr><th>Medicine</th><th>Qty</th><th>Price</th><th>Total</th></tr>";
+    let grand = 0;
+
+    for (let code in cart) {
+        let item = cart[code];
+        let total = item.qty * item.price;
+        grand += total;
+        rows += `<tr><td>${item.name}</td><td>${item.qty}</td><td>₹${item.price}</td><td>₹${total.toFixed(2)}</td></tr>`;
+    }
+
+    printTable.innerHTML = rows;
+    document.getElementById("printTotal").innerText = "Total: ₹" + grand.toFixed(2);
+
+    printArea.style.display = "block";
+    window.print();
+    printArea.style.display = "none";
+}
+
+// CAMERA SCANNER
+function startCamera() {
+    document.getElementById("startBtn").style.display = "none";
+    document.getElementById("stopBtn").style.display = "inline-flex";
+    document.getElementById("scannerBox").style.display = "block";
+
+    scanner = new Html5Qrcode("reader");
+    scanner.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 250, height: 120 } },
+        (decodedText) => {
+            addToCart(decodedText);
+            stopCamera();
+        },
+        () => {}
+    ).catch(err => {
+        showNotify("Camera Error", "Could not access camera", "error");
+        stopCamera();
+    });
+}
+
+function stopCamera() {
+    if (scanner) {
+        scanner.stop().then(() => {
+            scanner = null;
+            document.getElementById("startBtn").style.display = "inline-flex";
+            document.getElementById("stopBtn").style.display = "none";
+            document.getElementById("scannerBox").style.display = "none";
+        });
+    }
+}
 </script>
 
-<div id="toast-container"></div>
-
+<style>
+@media print {
+    body > *:not(#printArea) { display: none !important; }
+    #printArea { display: block !important; }
+}
+</style>
 </body>
 </html>
